@@ -1,0 +1,5 @@
+com\example\erp\model\Product.class
+com\example\erp\service\BagistoSyncService.class
+com\example\erp\repository\ProductRepository.class
+com\example\erp\controller\ProductController.class
+com\example\erp\ErpApplication.class

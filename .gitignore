@@ -1,0 +1,16 @@
+# --- Spring Boot (Java) ---
+spring-backend/target/
+spring-backend/.gradle/
+spring-backend/build/
+spring-backend/*.jar
+
+# --- Bagisto (Laravel/PHP) ---
+bagisto-frontend/vendor/
+bagisto-frontend/node_modules/
+bagisto-frontend/public/storage
+bagisto-frontend/storage/*.key
+bagisto-frontend/.env
+
+# --- General ---
+.DS_Store
+.env

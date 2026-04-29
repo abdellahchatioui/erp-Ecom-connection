@@ -27,13 +27,20 @@ public class ProductController {
     @PostMapping
     public Product createProduct(@RequestBody Product product) {
         Product savedProduct = repository.save(product);
-        syncService.syncToBagisto(savedProduct.getId());
+        syncService.syncToBagisto(savedProduct.getSku());
         return savedProduct;
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<Product> getProductForBagisto(@PathVariable Long id) {
         return repository.findById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @GetMapping("/sku/{sku}")
+    public ResponseEntity<Product> getProductBySku(@PathVariable String sku) {
+        return repository.findBySku(sku)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }

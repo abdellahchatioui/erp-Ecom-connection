@@ -22,20 +22,20 @@ public class BagistoSyncService {
     @Value("${bagisto.api.key}")
     private String apiKey;
 
-    public void syncToBagisto(Long erpProductId) {
+    public void syncToBagisto(String sku) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.set("X-ERP-KEY", apiKey);
+        headers.set("X-ERP-TOKEN", apiKey); // Changed header to match Bagisto expectation
         headers.set("Accept", "application/json");
 
         Map<String, Object> body = new HashMap<>();
-        body.put("erp_id", erpProductId);
+        body.put("sku", sku);
 
         HttpEntity<Map<String, Object>> request = new HttpEntity<>(body, headers);
 
         try {
             ResponseEntity<String> response = restTemplate.postForEntity(
-                bagistoUrl + "/api/erp/sync-product", 
+                bagistoUrl + "/api/erp/webhook/product", 
                 request, 
                 String.class
             );

@@ -68,7 +68,12 @@ class SyncProductFromErpJob implements ShouldQueue
             'short_description'    => $erpProduct['short_description'] ?? '',
             'description'          => $erpProduct['description'] ?? '',
             'url_key'              => strtolower(str_replace(' ', '-', $erpProduct['name'] ?? $this->sku)),
-            // Add other attributes like 'tax_category_id', 'inventories', etc.
+            'inventories'          => [
+                1 => $erpProduct['quantity'] ?? 100, // Assign stock (Source ID 1)
+            ],
+            'channels'             => [
+                1 // Assign to Channel ID 1
+            ],
         ];
 
         // 3. Check if the product already exists in Bagisto

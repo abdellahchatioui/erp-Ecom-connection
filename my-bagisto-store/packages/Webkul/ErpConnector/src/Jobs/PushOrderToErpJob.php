@@ -49,27 +49,28 @@ class PushOrderToErpJob implements ShouldQueue
             'customer_name'    => $this->order->customer_first_name . ' ' . $this->order->customer_last_name,
             'grand_total'      => $this->order->grand_total,
             'base_grand_total' => $this->order->base_grand_total,
-            'created_at'       => $this->order->created_at->toIso8601String(),
+            'created_at'       => is_object($this->order->created_at) ? $this->order->created_at->toIso8601String() : $this->order->created_at,
             'items'            => $this->mapOrderItems(),
             'billing_address'  => $this->mapAddress($this->order->billing_address),
             'shipping_address' => $this->mapAddress($this->order->shipping_address),
         ];
 
-        // Send HTTP POST request to the ERP
-        $response = Http::withToken($erpToken)
-            ->post("{$erpUrl}/api/erp/orders", $mappedOrder);
+        try {
+            // Send HTTP POST request to the ERP with a timeout to prevent hanging
+            $response = Http::timeout(10)->withHeaders(['X-ERP-TOKEN' => $erpToken])
+                ->post("{$erpUrl}/api/erp/orders", $mappedOrder);
 
-        if ($response->failed()) {
-            Log::error("Failed to push Order ID {$this->order->id} to ERP.", [
-                'status' => $response->status(),
-                'response' => $response->body()
-            ]);
-            
-            // Re-throw exception so the job is marked as failed and can be retried
-            $response->throw();
+            if ($response->failed()) {
+                Log::error("Failed to push Order ID {$this->order->id} to ERP.", [
+                    'status' => $response->status(),
+                    'response' => $response->body()
+                ]);
+            } else {
+                Log::info("Successfully pushed Order ID {$this->order->id} to ERP.");
+            }
+        } catch (\Exception $e) {
+            Log::error("Exception while pushing Order ID {$this->order->id} to ERP: " . $e->getMessage());
         }
-
-        Log::info("Successfully pushed Order ID {$this->order->id} to ERP.");
     }
 
     /**
@@ -107,11 +108,14 @@ class PushOrderToErpJob implements ShouldQueue
             return null;
         }
 
+        // Bagisto address1 can sometimes be an array or multi-line
+        $address1 = is_array($address->address1) ? implode(', ', $address->address1) : $address->address1;
+
         return [
             'first_name' => $address->first_name,
             'last_name'  => $address->last_name,
             'email'      => $address->email,
-            'address1'   => $address->address1,
+            'address1'   => $address1,
             'city'       => $address->city,
             'state'      => $address->state,
             'postcode'   => $address->postcode,

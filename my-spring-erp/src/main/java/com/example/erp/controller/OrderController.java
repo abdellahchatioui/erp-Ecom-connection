@@ -67,8 +67,8 @@ public class OrderController {
             return ResponseEntity.ok().body("Order received successfully");
             
         } catch (Exception e) {
-            System.err.println("Failed to process order: " + e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error processing order");
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error processing order: " + e.getMessage());
         }
     }
 }

@@ -31,5 +31,7 @@ class ErpConnectorServiceProvider extends ServiceProvider
         $this->mergeConfigFrom(
             __DIR__ . '/../Config/erp.php', 'erp'
         );
+
+        $this->app->register(EventServiceProvider::class);
     }
 }
